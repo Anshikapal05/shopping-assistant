@@ -1,37 +1,36 @@
-# Voice Command Shopping Assistant
+# Voice Shopping Assistant
 
-A voice-based shopping list manager with smart suggestions built with React, Express.js, and MongoDB.
+A voice-powered shopping list with smart suggestions and voice search. Built with React (Vite + Tailwind), Express.js, and MongoDB.
 
 ## Features
 
 ### ✅ Implemented
-- **Voice Input**: Voice command recognition for adding/removing items
-- **Natural Language Processing**: Understands varied user phrases
-- **Shopping List Management**: Add, remove, and categorize items
-- **Real-time UI**: Visual feedback for voice commands
-- **Responsive Design**: Mobile-optimized interface with Tailwind CSS
+- **Voice input**: Add/remove/toggle items via speech
+- **Text command input**: Type natural phrases (e.g., "add 2 apples")
+- **Quick commands**: One-click add of common commands (non-voice)
+- **Shopping list**: Add, remove, toggle complete, categories, quantities
+- **Smart suggestions**: Recommendations, seasonal picks, and substitutes
+- **Voice search**: Search catalog by name/brand and filter by price (e.g., "find toothpaste under $5")
+- **Responsive UI** with Tailwind CSS
 
-### 🚧 Planned Features
-- **Smart Suggestions**: Product recommendations based on history
-- **Seasonal Recommendations**: Suggest seasonal items
-- **Substitutes**: Offer product alternatives
-- **Multilingual Support**: Voice commands in multiple languages
-- **Price Range Filtering**: Voice-based price filtering
-- **Quantity Management**: Specify quantities via voice
+### 🚧 Planned
+- Multilingual voice commands
+- Auth and multi-user lists
+- Store integrations and richer catalog
 
 ## Tech Stack
 
 ### Frontend
-- **React 19** with Vite
-- **Tailwind CSS** for styling
-- **react-speech-kit** for voice recognition
-- **Axios** for API calls
+- React 19 + Vite
+- Tailwind CSS
+- react-speech-kit (browser speech API)
+- Axios
 
 ### Backend
-- **Express.js** server
-- **MongoDB** with Mongoose
-- **CORS** enabled for cross-origin requests
-- **RESTful API** endpoints
+- Express.js
+- MongoDB with Mongoose
+- Simple NLP in `shoppingList.js`
+- In-memory catalog in `backend/utils/catalog.js` for suggestions/search
 
 ## Project Structure
 
@@ -42,6 +41,9 @@ voice-shopping-assistant/
 │   │   ├── components/      # React components
 │   │   │   ├── Header.jsx
 │   │   │   ├── VoiceRecorder.jsx
+│   │   │   ├── QuickCommands.jsx
+│   │   │   ├── Suggestions.jsx
+│   │   │   ├── SearchResults.jsx
 │   │   │   └── ShoppingList.jsx
 │   │   ├── App.jsx          # Main app component
 │   │   └── index.css        # Tailwind CSS
@@ -52,6 +54,8 @@ voice-shopping-assistant/
 │   │   └── ShoppingItem.js
 │   ├── routes/              # API routes
 │   │   └── shoppingList.js
+│   ├── utils/
+│   │   └── catalog.js       # lightweight demo catalog
 │   ├── server.js            # Main server file
 │   └── package.json
 └── README.md
@@ -110,12 +114,12 @@ The backend will run on `http://localhost:5000`
 cd frontend
 npm run dev
 ```
-The frontend will run on `http://localhost:5173`
+The frontend will run on `http://localhost:5173` (or the next free port)
 
 ## Usage
 
-### Voice Commands
-The app supports various voice commands:
+### Voice Commands & Search
+The app supports:
 
 **Adding Items:**
 - "Add milk to my list"
@@ -126,6 +130,11 @@ The app supports various voice commands:
 **Removing Items:**
 - "Remove milk from my list"
 - "Delete apples"
+
+**Voice Search:**
+- "Find organic apples"
+- "Search toothpaste under $5"
+- "Look for milk by DairyPure"
 
 ### Manual Interaction
 - Click the microphone button to start voice recognition
@@ -141,7 +150,11 @@ The app supports various voice commands:
 - `PUT /api/shopping-list/:id` - Update item
 - `DELETE /api/shopping-list/:id` - Delete item
 - `PATCH /api/shopping-list/:id/toggle` - Toggle completion
-- `POST /api/shopping-list/voice-command` - Process voice command
+- `POST /api/shopping-list/voice-command` - Process voice command or voice search
+- `GET /api/shopping-list/suggestions` - Smart suggestions (recommendations/seasonal/substitutes)
+
+### Voice command processing
+- Adds/removes items and can interpret search queries with brand/price filters.
 
 ## Development
 
@@ -164,6 +177,30 @@ The app uses a simple NLP approach to process voice commands:
 - Edge
 
 **Note**: Voice recognition requires HTTPS in production or localhost for development.
+
+## Deploying (Firebase Hosting + hosted backend)
+
+1. Set API base URL in the frontend:
+   - In `frontend/src/App.jsx` ensure:
+     ```js
+     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'
+     ```
+   - Create `frontend/.env.production` with:
+     ```
+     VITE_API_BASE_URL=https://YOUR-BACKEND-URL/api
+     ```
+2. Build frontend:
+   ```bash
+   cd frontend && npm run build
+   ```
+3. Firebase Hosting:
+   ```bash
+   npm i -g firebase-tools
+   firebase login
+   firebase init hosting   # public dir: frontend/dist, SPA: yes
+   firebase deploy --only hosting
+   ```
+4. Host backend (Render/Railway/Cloud Run) and point `VITE_API_BASE_URL` to it.
 
 ## Contributing
 1. Fork the repository
