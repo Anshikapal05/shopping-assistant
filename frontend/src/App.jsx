@@ -63,15 +63,37 @@ function App() {
     // quantity: first number, default 1
     const matchNum = lower.match(/\b(\d+)\b/)
     const quantity = matchNum ? parseInt(matchNum[1], 10) : 1
-    // strip common words
+    // strip common command words (standalone) and numbers, keep item text intact
     const name = lower
-      .replace(/add|please|i\s*need|i\s*want|\b\d+\b|to|some|a|an/gi, ' ')
-      .trim()
+      .replace(/\b(add|please|i\s*need|i\s*want|to|some|a|an)\b/gi, ' ')
+      .replace(/\b\d+\b/g, ' ')
+      .replace(/[^a-z0-9\s]/gi, ' ') // remove punctuation
       .replace(/\s+/g, ' ')
+      .trim()
+    // categorize by keywords (mirror of backend)
+    const categorize = (itemName) => {
+      const categories = {
+        dairy: ['milk', 'cheese', 'yogurt', 'butter', 'cream', 'sour cream', 'cottage cheese', 'mozzarella', 'cheddar'],
+        produce: ['apple', 'banana', 'orange', 'lettuce', 'tomato', 'carrot', 'onion', 'potato', 'broccoli', 'spinach', 'cucumber', 'pepper', 'avocado', 'lemon', 'lime', 'grape', 'strawberry', 'blueberry', 'organic'],
+        meat: ['chicken', 'beef', 'pork', 'fish', 'turkey', 'salmon', 'tuna', 'ham', 'bacon', 'sausage', 'ground beef', 'steak'],
+        bakery: ['bread', 'roll', 'bagel', 'muffin', 'cake', 'croissant', 'donut', 'cookie', 'pastry', 'tortilla', 'pita'],
+        snacks: ['chips', 'crackers', 'nuts', 'cookies', 'candy', 'popcorn', 'pretzel', 'granola', 'trail mix', 'chocolate'],
+        beverages: ['water', 'juice', 'soda', 'coffee', 'tea', 'beer', 'wine', 'smoothie', 'energy drink', 'sports drink'],
+        household: ['toilet paper', 'soap', 'shampoo', 'detergent', 'tissue', 'paper towel', 'cleaning', 'laundry', 'dish soap', 'toothpaste', 'deodorant'],
+        frozen: ['frozen', 'ice cream', 'frozen dinner', 'frozen pizza', 'frozen vegetables'],
+        pantry: ['rice', 'pasta', 'cereal', 'oats', 'flour', 'sugar', 'salt', 'pepper', 'oil', 'vinegar', 'sauce', 'soup', 'canned']
+      }
+      const lowerName = (itemName || '').toLowerCase()
+      for (const [cat, words] of Object.entries(categories)) {
+        if (words.some(w => lowerName.includes(w))) return cat
+      }
+      return 'other'
+    }
+    const category = categorize(name || text)
     const item = {
       name: name || text,
       quantity,
-      category: 'other',
+      category,
       addedByVoice: false,
     }
     await addItem(item)

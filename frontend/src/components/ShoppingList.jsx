@@ -129,7 +129,7 @@ const ShoppingList = ({ items, isLoading, onRemove, onToggle }) => {
               
               <button
                 onClick={() => onRemove(item._id)}
-                className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-all duration-200 hover:scale-110"
+                className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-all duration-200 hover:scale-110 hover:cursor-pointer"
                 title="Remove item"
               >
                 🗑️
