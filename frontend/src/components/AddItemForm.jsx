@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
+import { useToast } from '../contexts/ToastContext.jsx'
 
 const AddItemForm = ({ onAddItem }) => {
   const [itemName, setItemName] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [category, setCategory] = useState('other')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { add: addToast } = useToast()
 
   const categories = [
     { value: 'dairy', label: '🥛 Dairy' },
@@ -30,11 +32,13 @@ const AddItemForm = ({ onAddItem }) => {
         quantity: parseInt(quantity),
         category: category
       })
+      addToast({ type: 'success', message: `Added ${itemName.trim()} successfully` })
       setItemName('')
       setQuantity(1)
       setCategory('other')
     } catch (error) {
       console.error('Error adding item:', error)
+      addToast({ type: 'error', message: 'Failed to add item' })
     } finally {
       setIsSubmitting(false)
     }

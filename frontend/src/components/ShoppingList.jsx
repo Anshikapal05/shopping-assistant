@@ -1,6 +1,8 @@
 import React from 'react'
+import { useToast } from '../contexts/ToastContext.jsx'
 
 const ShoppingList = ({ items, isLoading, onRemove, onToggle }) => {
+  const { add: addToast } = useToast()
   const getCategoryIcon = (category) => {
     const icons = {
       dairy: '🥛',
@@ -81,7 +83,14 @@ const ShoppingList = ({ items, isLoading, onRemove, onToggle }) => {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4 flex-1">
                 <button
-                  onClick={() => onToggle(item._id)}
+                  onClick={async () => {
+                    try {
+                      await onToggle(item._id)
+                      // no toast on toggle to avoid noise
+                    } catch (e) {
+                      addToast({ type: 'error', message: 'Failed to update item' })
+                    }
+                  }}
                   className={`w-6 h-6 md:w-7 md:h-7 hover:cursor-pointer rounded-full border-2 flex items-center justify-center transition-all duration-200 hover:scale-110 ${
                     item.completed
                       ? 'bg-gradient-to-r from-green-500 to-emerald-500 border-green-500 text-white shadow-lg'
@@ -128,7 +137,14 @@ const ShoppingList = ({ items, isLoading, onRemove, onToggle }) => {
               </div>
               
               <button
-                onClick={() => onRemove(item._id)}
+                onClick={async () => {
+                  try {
+                    await onRemove(item._id)
+                    addToast({ type: 'success', message: 'Deleted successfully' })
+                  } catch (e) {
+                    addToast({ type: 'error', message: 'Failed to delete item' })
+                  }
+                }}
                 className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-all duration-200 hover:scale-110 hover:cursor-pointer"
                 title="Remove item"
               >

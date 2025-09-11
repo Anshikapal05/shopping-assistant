@@ -1,6 +1,8 @@
 import React from 'react'
+import { useToast } from '../contexts/ToastContext.jsx'
 
 const QuickCommands = ({ onQuickAdd }) => {
+  const { add: addToast } = useToast()
   const quickCommands = [
     { text: "Add milk", icon: "🥛" },
     { text: "Add 2 apples", icon: "🍎" },
@@ -23,7 +25,20 @@ const QuickCommands = ({ onQuickAdd }) => {
         {quickCommands.map((command, index) => (
           <button
             key={index}
-            onClick={() => onQuickAdd(command.text)}
+            onClick={async () => {
+              try {
+                const msg = await onQuickAdd(command.text)
+                if (/removed/i.test(msg)) {
+                  addToast({ type: 'success', message: 'Deleted successfully' })
+                } else if (/added/i.test(msg)) {
+                  addToast({ type: 'success', message: 'Added successfully' })
+                } else {
+                  addToast({ type: 'info', message: msg || 'Done' })
+                }
+              } catch (e) {
+                addToast({ type: 'error', message: 'Action failed' })
+              }
+            }}
             className="group flex items-center space-x-3 p-4 bg-gradient-to-r from-pastel-blue/80 to-pastel-lavender/80 hover:from-pastel-blue/90 hover:to-pastel-lavender/90 border border-blue-300 rounded-xl transition-all duration-300 text-left hover:scale-105 hover:shadow-lg hover:cursor-pointer"
           >
             <span className="text-2xl group-hover:scale-110 transition-transform duration-200">{command.icon}</span>

@@ -57,18 +57,36 @@ function App() {
   }
 
   const quickAdd = async (text) => {
-    // Parse simple commands like "Add milk", "Add 2 apples"
+    // Parse commands like "Add milk" or "Remove milk" and common removal variants
     const lower = String(text || '').toLowerCase()
-    // quantity: first number, default 1
+    const isRemove = /(\bremove\b|\bdelete\b|don'?t\s+need|dont\s+need|\bcross\s+off\b|don'?t\s+want)/i.test(lower)
+    // quantity: first number, default 1 (only relevant for add)
     const matchNum = lower.match(/\b(\d+)\b/)
     const quantity = matchNum ? parseInt(matchNum[1], 10) : 1
     // strip common command words (standalone) and numbers, keep item text intact
-    const name = lower
-      .replace(/\b(add|please|i\s*need|i\s*want|to|some|a|an)\b/gi, ' ')
+    const cleanedName = lower
+      .replace(/\b(add|remove|delete|please|i\s*need|i\s*want|to|some|a|an|all|the|item|items|cross\s+off|don'?t\s+need|dont\s+need|don'?t\s+want)\b/gi, ' ')
       .replace(/\b\d+\b/g, ' ')
-      .replace(/[^a-z0-9\s]/gi, ' ') // remove punctuation
+      .replace(/[^a-z0-9\s]/gi, ' ')
       .replace(/\s+/g, ' ')
       .trim()
+
+    if (isRemove) {
+      // Prevent removing everything if the query is empty
+      if (!cleanedName) {
+        return 'Please specify what to remove'
+      }
+      // Remove any items whose name includes the cleanedName substring
+      const query = cleanedName
+      const targets = shoppingItems.filter((it) => it.name?.toLowerCase().includes(query))
+      if (targets.length === 0) {
+        return `No items found to remove for "${query || text}"`
+      }
+      await Promise.all(targets.map((t) => removeItem(t._id)))
+      return `Removed ${targets.length} item${targets.length > 1 ? 's' : ''}${query ? ` matching "${query}"` : ''}`
+    }
+
+    const name = cleanedName
     // categorize by keywords (mirror of backend)
     const categorize = (itemName) => {
       const categories = {
